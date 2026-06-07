@@ -5,5 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "bun test"
+  },
+  "bin": {
+    "agentville": "src/cli.ts"
   }
 }
