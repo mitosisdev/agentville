@@ -1,9 +1,29 @@
 {
   "name": "agentville",
   "version": "0.0.1",
+  "description": "SVG city skyline where every merged PR plants a building — your commit history as a growing city",
   "private": false,
   "type": "module",
+  "main": "src/agentville.ts",
+  "module": "src/agentville.ts",
+  "exports": {
+    ".": "./src/agentville.ts"
+  },
+  "bin": {
+    "agentville": "src/cli.ts"
+  },
+  "files": [
+    "src/agentville.ts",
+    "src/cli.ts",
+    "README.md"
+  ],
+  "keywords": ["git", "svg", "visualization", "github", "pr", "skyline", "city"],
+  "license": "MIT",
   "scripts": {
-    "test": "bun test"
+    "test": "bun test",
+    "prepublishOnly": "bun test"
+  },
+  "devDependencies": {
+    "yaml": "^2.9.0"
   }
 }
