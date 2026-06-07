@@ -1,0 +1,85 @@
+name: 'Agentville — SVG City Skyline'
+description: 'Generate an SVG city skyline where every merged PR is a building'
+author: 'mitosisdev'
+branding:
+  icon: 'bar-chart-2'
+  color: 'purple'
+
+inputs:
+  token:
+    description: 'GitHub token (for fetching PR data)'
+    required: false
+    default: ${{ github.token }}
+  output:
+    description: 'Output SVG file path'
+    required: false
+    default: 'agentville.svg'
+  commit:
+    description: 'Whether to commit the generated SVG back to the repo'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version: latest
+
+    - name: Install agentville
+      shell: bash
+      run: bun install --global agentville@latest
+
+    - name: Fetch PR data
+      shell: bash
+      id: fetch-prs
+      run: |
+        REPO="${{ github.repository }}"
+        echo "Fetching PRs for $REPO..."
+
+        # Fetch merged PRs
+        MERGED=$(gh pr list --repo "$REPO" --state merged --json number,additions,deletions --limit 100)
+        # Fetch open PRs
+        OPEN=$(gh pr list --repo "$REPO" --state open --json number,additions,deletions --limit 100)
+
+        # Combine and format as agentville JSON
+        node -e "
+          const merged = JSON.parse(process.env.MERGED || '[]');
+          const open = JSON.parse(process.env.OPEN || '[]');
+          const prs = [
+            ...merged.map(p => ({
+              number: p.number,
+              linesChanged: (p.additions || 0) + (p.deletions || 0),
+              merged: true,
+              repoName: '$REPO'
+            })),
+            ...open.map(p => ({
+              number: p.number,
+              linesChanged: (p.additions || 0) + (p.deletions || 0),
+              merged: false,
+              repoName: '$REPO'
+            }))
+          ].sort((a, b) => a.number - b.number);
+          process.stdout.write(JSON.stringify(prs, null, 2));
+        " MERGED="$MERGED" OPEN="$OPEN" > /tmp/agentville-prs.json
+
+        echo "Found $(cat /tmp/agentville-prs.json | node -e 'process.stdout.write(String(JSON.parse(require("fs").readFileSync("/dev/stdin","utf8")).length))') PRs"
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+
+    - name: Generate skyline SVG
+      shell: bash
+      run: |
+        agentville /tmp/agentville-prs.json "${{ github.repository }}" > "${{ inputs.output }}"
+        echo "Generated ${{ inputs.output }}"
+
+    - name: Commit SVG
+      if: inputs.commit == 'true'
+      shell: bash
+      run: |
+        git config user.name "agentville[bot]"
+        git config user.email "agentville@users.noreply.github.com"
+        git add "${{ inputs.output }}"
+        git diff --cached --quiet && echo "No changes to commit" || git commit -m "chore: update city skyline [skip ci]"
+        git push
