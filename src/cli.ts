@@ -1,14 +1,31 @@
 #!/usr/bin/env bun
 import { generateSkyline } from "./skyline.js";
+import { generateGif } from "./gif.js";
 import { fetchPRs } from "./fetcher.js";
 import type { PullRequest } from "./types.js";
 import { writeFileSync } from "fs";
 
-// Parse args: [repo] [--out <path>]
+// Parse args: [repo] [--out <path>] [--gif [outfile]]
 const args = process.argv.slice(2);
+
 const outFlagIdx = args.indexOf("--out");
 const outPath = outFlagIdx !== -1 ? args[outFlagIdx + 1] ?? "skyline.svg" : "skyline.svg";
-const repoName = args.filter((_, i) => i !== outFlagIdx && i !== outFlagIdx + 1)[0] ?? "demo/repo";
+
+const gifFlagIdx = args.indexOf("--gif");
+const gifMode = gifFlagIdx !== -1;
+// Optional positional path immediately after --gif (skip if it's another flag).
+const gifArg = gifMode ? args[gifFlagIdx + 1] : undefined;
+const gifPath = gifArg && !gifArg.startsWith("--") ? gifArg : "agentville.gif";
+
+// The repo name is the first positional arg that isn't consumed by a flag.
+const consumed = new Set<number>();
+if (outFlagIdx !== -1) consumed.add(outFlagIdx).add(outFlagIdx + 1);
+if (gifMode) {
+  consumed.add(gifFlagIdx);
+  if (gifArg && !gifArg.startsWith("--")) consumed.add(gifFlagIdx + 1);
+}
+const repoName =
+  args.filter((a, i) => !consumed.has(i) && !a.startsWith("--"))[0] ?? "demo/repo";
 
 // Demo data — used when no GitHub token is available
 const demoPRs: PullRequest[] = [
@@ -21,19 +38,42 @@ const demoPRs: PullRequest[] = [
 
 const ghAuth = process.env.GITHUB_TOKEN;
 
-async function main() {
-  let prs: PullRequest[];
+/** Sort PRs oldest-first by merge date so the timelapse grows chronologically.
+ *  Open PRs (no mergedAt) sort to the end, preserving fetch order among them. */
+function sortByMergeDate(prs: PullRequest[]): PullRequest[] {
+  return [...prs].sort((a, b) => {
+    if (a.mergedAt && b.mergedAt) return a.mergedAt.localeCompare(b.mergedAt);
+    if (a.mergedAt) return -1;
+    if (b.mergedAt) return 1;
+    return 0;
+  });
+}
+
+async function loadPRs(): Promise<PullRequest[]> {
   if (ghAuth && repoName !== "demo/repo") {
     try {
       console.log(`Fetching PRs for ${repoName}…`);
-      prs = await fetchPRs(repoName, ghAuth);
+      const prs = await fetchPRs(repoName, ghAuth);
       console.log(`  fetched ${prs.length} PRs`);
+      return prs;
     } catch (err) {
       console.warn(`  fetch failed (${err}), falling back to demo data`);
-      prs = demoPRs;
+      return demoPRs;
     }
-  } else {
-    prs = demoPRs;
+  }
+  return demoPRs;
+}
+
+async function main() {
+  const prs = await loadPRs();
+
+  if (gifMode) {
+    const ordered = sortByMergeDate(prs);
+    console.log(`Rendering ${ordered.length} timelapse frames…`);
+    const gif = await generateGif(ordered, repoName);
+    writeFileSync(gifPath, gif);
+    console.log(`✓ wrote ${gifPath} (${gif.length} bytes, ${ordered.length} frames)`);
+    return;
   }
 
   const svg = generateSkyline(prs, repoName);
