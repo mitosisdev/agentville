@@ -95,6 +95,36 @@ describe("README.md", () => {
     const content = readFileSync(readmePath, "utf8");
     expect(content).toContain("auto-generated on every merge");
   });
+
+  it("includes the exact one-line pitch", () => {
+    const content = readFileSync(readmePath, "utf8");
+    expect(content).toContain(
+      "Every merged PR plants a building. This is agentville's own skyline.",
+    );
+  });
+
+  it("links to the live demo page", () => {
+    const content = readFileSync(readmePath, "utf8");
+    expect(content).toContain("https://mitosisdev.github.io/agentville/");
+  });
+
+  it("explains how to install and run it via bun", () => {
+    const content = readFileSync(readmePath, "utf8").toLowerCase();
+    expect(content).toContain("bun");
+    expect(content).toContain("agentville");
+    expect(content).toContain("--out");
+  });
+
+  it("documents the GITHUB_TOKEN environment variable", () => {
+    const content = readFileSync(readmePath, "utf8");
+    expect(content).toContain("GITHUB_TOKEN");
+  });
+
+  it("explains that the skyline auto-regenerates on every PR merge", () => {
+    const content = readFileSync(readmePath, "utf8").toLowerCase();
+    expect(content).toContain("regenerat");
+    expect(content).toContain("merge");
+  });
 });
 
 describe("src/cli.ts --out flag", () => {
