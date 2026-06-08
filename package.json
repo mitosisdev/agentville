@@ -8,5 +8,9 @@
   },
   "bin": {
     "agentville": "./src/cli.ts"
+  },
+  "dependencies": {
+    "@resvg/resvg-wasm": "^2.6.2",
+    "gifenc": "^1.0.3"
   }
 }

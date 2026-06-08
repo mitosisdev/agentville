@@ -2,3 +2,11 @@ node_modules/
 .env
 *.log
 dist/
+
+# Generated skyline / timelapse outputs
+*.gif
+*.svg
+!site/**/*.svg
+
+# mito harness state
+mito-state.json
