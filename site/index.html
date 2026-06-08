@@ -101,93 +101,13 @@
       agentville turns your repository activity into a living city skyline. Autonomous agents commit, merge PRs, and watch the city grow — each contribution raising a new structure on the horizon. It's a visualization layer for how AI dev shops actually work.
     </p>
 
-    <!-- Inline SVG skyline preview: purple buildings on dark background -->
-    <svg
+    <!-- Live skyline: regenerated on every merge to main -->
+    <img
       class="skyline"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 600 200"
-      width="600"
-      height="200"
-      aria-label="agentville skyline preview"
-    >
-      <!-- Sky background -->
-      <rect width="600" height="200" fill="#0b0d10"/>
-
-      <!-- Stars (small dots) -->
-      <circle cx="40" cy="20" r="1" fill="#4a5568"/>
-      <circle cx="120" cy="12" r="1" fill="#4a5568"/>
-      <circle cx="200" cy="30" r="1.5" fill="#6b7280"/>
-      <circle cx="310" cy="8" r="1" fill="#4a5568"/>
-      <circle cx="420" cy="18" r="1.5" fill="#6b7280"/>
-      <circle cx="500" cy="10" r="1" fill="#4a5568"/>
-      <circle cx="570" cy="25" r="1" fill="#4a5568"/>
-      <circle cx="80" cy="40" r="1" fill="#374151"/>
-      <circle cx="460" cy="35" r="1" fill="#374151"/>
-
-      <!-- Ground line -->
-      <rect x="0" y="185" width="600" height="15" fill="#111318"/>
-
-      <!-- Buildings — varied heights, purple tones -->
-      <!-- Far left cluster -->
-      <rect x="10" y="140" width="28" height="45" fill="#6A1FBF"/>
-      <rect x="18" y="130" width="12" height="10" fill="#7B2FD0"/> <!-- rooftop detail -->
-      <rect x="42" y="155" width="20" height="30" fill="#5A189A"/>
-
-      <!-- Left-center cluster -->
-      <rect x="75" y="110" width="35" height="75" fill="#8A2BE2"/>
-      <rect x="88" y="100" width="10" height="12" fill="#9B3CF3"/> <!-- antenna base -->
-      <rect x="91" y="85" width="4" height="16" fill="#B060FF"/> <!-- antenna -->
-      <rect x="114" y="130" width="25" height="55" fill="#7122C0"/>
-      <rect x="118" y="122" width="17" height="10" fill="#7B2FD0"/>
-
-      <!-- Center-left -->
-      <rect x="148" y="145" width="22" height="40" fill="#5A189A"/>
-      <rect x="174" y="120" width="30" height="65" fill="#8A2BE2"/>
-      <rect x="180" y="112" width="18" height="10" fill="#9B3CF3"/>
-      <rect x="187" y="98" width="4" height="15" fill="#C070FF"/>
-
-      <!-- Center tall building -->
-      <rect x="215" y="80" width="42" height="105" fill="#9933FF"/>
-      <rect x="222" y="68" width="28" height="14" fill="#AA44FF"/>
-      <rect x="230" y="56" width="12" height="13" fill="#BB55FF"/>
-      <rect x="234" y="42" width="5" height="15" fill="#CC66FF"/> <!-- spire -->
-      <!-- Windows -->
-      <rect x="220" y="95" width="6" height="8" fill="#1a0f2e" opacity="0.7"/>
-      <rect x="230" y="95" width="6" height="8" fill="#1a0f2e" opacity="0.7"/>
-      <rect x="242" y="95" width="6" height="8" fill="#CC66FF" opacity="0.4"/>
-      <rect x="220" y="110" width="6" height="8" fill="#CC66FF" opacity="0.3"/>
-      <rect x="230" y="110" width="6" height="8" fill="#1a0f2e" opacity="0.7"/>
-      <rect x="242" y="110" width="6" height="8" fill="#1a0f2e" opacity="0.7"/>
-
-      <!-- Center-right cluster -->
-      <rect x="268" y="125" width="28" height="60" fill="#7B2FD0"/>
-      <rect x="300" y="140" width="20" height="45" fill="#6A1FBF"/>
-      <rect x="324" y="115" width="32" height="70" fill="#8A2BE2"/>
-      <rect x="331" y="106" width="18" height="11" fill="#9B3CF3"/>
-      <rect x="338" y="94" width="5" height="13" fill="#B060FF"/>
-
-      <!-- Right-center -->
-      <rect x="368" y="130" width="25" height="55" fill="#5A189A"/>
-      <rect x="397" y="100" width="38" height="85" fill="#8833EE"/>
-      <rect x="405" y="90" width="22" height="12" fill="#9944FF"/>
-      <rect x="412" y="78" width="8" height="13" fill="#AA55FF"/>
-
-      <!-- Right cluster -->
-      <rect x="444" y="145" width="22" height="40" fill="#6A1FBF"/>
-      <rect x="470" y="120" width="30" height="65" fill="#7B2FD0"/>
-      <rect x="477" y="112" width="16" height="10" fill="#8A3EE0"/>
-      <rect x="484" y="100" width="4" height="13" fill="#9B4FF1"/>
-
-      <!-- Far right -->
-      <rect x="510" y="150" width="18" height="35" fill="#5A189A"/>
-      <rect x="532" y="135" width="24" height="50" fill="#6A1FBF"/>
-      <rect x="538" y="126" width="12" height="11" fill="#7A2FCF"/>
-      <rect x="560" y="155" width="16" height="30" fill="#5A189A"/>
-      <rect x="580" y="145" width="14" height="40" fill="#4A0F8A"/>
-
-      <!-- Subtle purple glow at horizon -->
-      <rect x="0" y="182" width="600" height="4" fill="#2D0D5A" opacity="0.6"/>
-    </svg>
+      src="skyline.svg"
+      width="700"
+      alt="agentville skyline — auto-generated on every merged PR"
+    />
 
     <a class="repo-link" href="https://github.com/mitosisdev/agentville" target="_blank" rel="noopener">
       View on GitHub

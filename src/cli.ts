@@ -1,9 +1,14 @@
 #!/usr/bin/env bun
 import { generateSkyline } from "./skyline.js";
+import { fetchPRs } from "./fetcher.js";
 import type { PullRequest } from "./types.js";
 import { writeFileSync } from "fs";
 
-const repoName = process.argv[2] ?? "demo/repo";
+// Parse args: [repo] [--out <path>]
+const args = process.argv.slice(2);
+const outFlagIdx = args.indexOf("--out");
+const outPath = outFlagIdx !== -1 ? args[outFlagIdx + 1] ?? "skyline.svg" : "skyline.svg";
+const repoName = args.filter((_, i) => i !== outFlagIdx && i !== outFlagIdx + 1)[0] ?? "demo/repo";
 
 // Demo data — used when no GitHub token is available
 const demoPRs: PullRequest[] = [
@@ -14,7 +19,29 @@ const demoPRs: PullRequest[] = [
   { number: 5, title: "Tests + SPEC", state: "open", linesChanged: 150 },
 ];
 
-const svg = generateSkyline(demoPRs, repoName);
-const outPath = "skyline.svg";
-writeFileSync(outPath, svg, "utf8");
-console.log(`✓ wrote ${outPath}`);
+const ghAuth = process.env.GITHUB_TOKEN;
+
+async function main() {
+  let prs: PullRequest[];
+  if (ghAuth && repoName !== "demo/repo") {
+    try {
+      console.log(`Fetching PRs for ${repoName}…`);
+      prs = await fetchPRs(repoName, ghAuth);
+      console.log(`  fetched ${prs.length} PRs`);
+    } catch (err) {
+      console.warn(`  fetch failed (${err}), falling back to demo data`);
+      prs = demoPRs;
+    }
+  } else {
+    prs = demoPRs;
+  }
+
+  const svg = generateSkyline(prs, repoName);
+  writeFileSync(outPath, svg, "utf8");
+  console.log(`✓ wrote ${outPath}`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

@@ -20,6 +20,11 @@ describe("site/index.html", () => {
     const content = readFileSync(htmlPath, "utf8");
     expect(content).toContain("github.com/mitosisdev/agentville");
   });
+
+  it("references skyline.svg (live generated image)", () => {
+    const content = readFileSync(htmlPath, "utf8");
+    expect(content).toContain("skyline.svg");
+  });
 });
 
 describe(".github/workflows/pages.yml", () => {
@@ -32,5 +37,76 @@ describe(".github/workflows/pages.yml", () => {
   it("mentions actions/deploy-pages", () => {
     const content = readFileSync(pagesPath, "utf8");
     expect(content).toContain("actions/deploy-pages");
+  });
+
+  it("triggers on push to main", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    expect(content).toContain("push");
+    expect(content).toContain("main");
+  });
+
+  it("checks out with full history (fetch-depth: 0)", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    expect(content).toContain("fetch-depth: 0");
+  });
+
+  it("sets up bun", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    expect(content).toContain("oven-sh/setup-bun");
+  });
+
+  it("runs bun install", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    expect(content).toContain("bun install");
+  });
+
+  it("generates skyline SVG into site/", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    expect(content).toContain("site/skyline.svg");
+  });
+
+  it("passes GITHUB_TOKEN env var to skyline generation step", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    expect(content).toContain("GITHUB_TOKEN");
+  });
+
+  it("has correct permissions block", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    expect(content).toContain("pages: write");
+    expect(content).toContain("id-token: write");
+  });
+
+  it("deploys from site/ directory", () => {
+    const content = readFileSync(pagesPath, "utf8");
+    // upload-pages-artifact path should be site/
+    expect(content).toContain("path: site/");
+  });
+});
+
+describe("README.md", () => {
+  const readmePath = path.join(import.meta.dir, "../README.md");
+
+  it("embeds live skyline image", () => {
+    const content = readFileSync(readmePath, "utf8");
+    expect(content).toContain("mitosisdev.github.io/agentville/skyline.svg");
+  });
+
+  it("includes pitch line about auto-generation", () => {
+    const content = readFileSync(readmePath, "utf8");
+    expect(content).toContain("auto-generated on every merge");
+  });
+});
+
+describe("src/cli.ts --out flag", () => {
+  it("cli source supports --out flag", () => {
+    const cliPath = path.join(import.meta.dir, "../src/cli.ts");
+    const content = readFileSync(cliPath, "utf8");
+    expect(content).toContain("--out");
+  });
+
+  it("cli source reads GitHub token from environment", () => {
+    const cliPath = path.join(import.meta.dir, "../src/cli.ts");
+    const content = readFileSync(cliPath, "utf8");
+    expect(content).toContain("GITHUB_TOKEN");
   });
 });
