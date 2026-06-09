@@ -2,14 +2,20 @@
 import { generateSkyline } from "./skyline.js";
 import { generateGif } from "./gif.js";
 import { fetchPRs } from "./fetcher.js";
+import { buildAllSkylinesSvg } from "./multi.js";
 import type { PullRequest } from "./types.js";
-import { writeFileSync } from "fs";
+import { writeFileSync, existsSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 
-// Parse args: [repo] [--out <path>] [--gif [outfile]]
+// Parse args: [repo] [--out <path>] [--gif [outfile]] [--all]
 const args = process.argv.slice(2);
 
+const allMode = args.includes("--all");
+
 const outFlagIdx = args.indexOf("--out");
-const outPath = outFlagIdx !== -1 ? args[outFlagIdx + 1] ?? "skyline.svg" : "skyline.svg";
+const defaultOut = allMode ? "skyline-all.svg" : "skyline.svg";
+const outPath = outFlagIdx !== -1 ? args[outFlagIdx + 1] ?? defaultOut : defaultOut;
 
 const gifFlagIdx = args.indexOf("--gif");
 const gifMode = gifFlagIdx !== -1;
@@ -38,6 +44,20 @@ const demoPRs: PullRequest[] = [
 
 const ghAuth = process.env.GITHUB_TOKEN;
 
+/**
+ * Resolve the mito registry path. Precedence:
+ *  1. MITO_REGISTRY env var (explicit override)
+ *  2. ../../projects/registry.json relative to this repo (.workspace/agentville → mito root)
+ *  3. /home/sverre/mito/projects/registry.json (documented default)
+ */
+function resolveRegistryPath(): string {
+  if (process.env.MITO_REGISTRY) return process.env.MITO_REGISTRY;
+  const here = dirname(fileURLToPath(import.meta.url)); // .../agentville/src
+  const sibling = resolve(here, "../../../projects/registry.json");
+  if (existsSync(sibling)) return sibling;
+  return "/home/sverre/mito/projects/registry.json";
+}
+
 /** Sort PRs oldest-first by merge date so the timelapse grows chronologically.
  *  Open PRs (no mergedAt) sort to the end, preserving fetch order among them. */
 function sortByMergeDate(prs: PullRequest[]): PullRequest[] {
@@ -65,6 +85,15 @@ async function loadPRs(): Promise<PullRequest[]> {
 }
 
 async function main() {
+  if (allMode) {
+    const registryPath = resolveRegistryPath();
+    console.log(`Building multi-repo skyline from ${registryPath}…`);
+    const svg = await buildAllSkylinesSvg(registryPath, ghAuth);
+    writeFileSync(outPath, svg, "utf8");
+    console.log(`✓ wrote ${outPath}`);
+    return;
+  }
+
   const prs = await loadPRs();
 
   if (gifMode) {
